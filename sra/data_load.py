@@ -1,7 +1,6 @@
 import pandas as pd
 import csv
 import numpy as np
-import matplotlib.pyplot as plt
 import os
 import sys
 import string
@@ -84,8 +83,8 @@ class Trial(object):
         GCaMP_Time_Pre = np.asarray(times)
         f.close()
         
-        GCamp_Time = GCaMP_Time_Pre - GCaMP_Time_Pre[0]
-        self.Trace_Length = GCamp_Time[-1-9]
+        self.GCaMP_Time = GCaMP_Time_Pre - GCaMP_Time_Pre[0]
+        self.Trace_Length = self.GCaMP_Time[-1-9]
         #------------------------------------------------
         #Open and Load GCaMP data into dataframe
         df = pd.read_csv(self.gcamp_data_path, header=None)
@@ -167,20 +166,26 @@ class Trial(object):
         #------------------------------------------------
         #Takes regional mean saturation values
         #------------------------------------------------
-        self.G2_R=self.GCaMP_data['G2R_green']/self.GCaMP_data['G2R_red']
+        self.G2_R= self.GCaMP_data['G2R_green']/self.GCaMP_data['G2R_red']
         self.G3_R=self.GCaMP_data['G3R_green']/self.GCaMP_data['G3R_red']
         self.G4_R=self.GCaMP_data['G4R_green']/self.GCaMP_data['G4R_red']
         self.G5_R=self.GCaMP_data['G5R_green']/self.GCaMP_data['G5R_red']
 
-        self.G2_L=self.GCaMP_data['G2L_green']/self.GCaMP_data['G2L_red']
-        self.G3_L=self.GCaMP_data['G3L_green']/self.GCaMP_data['G3L_red']
-        self.G4_L=self.GCaMP_data['G4L_green']/self.GCaMP_data['G4L_red']
-        self.G5_L=self.GCaMP_data['G5L_green']/self.GCaMP_data['G5L_red']
+        self.G2_L=(self.GCaMP_data['G2L_green']/self.GCaMP_data['G2L_red'])
+        self.G3_L=(self.GCaMP_data['G3L_green']/self.GCaMP_data['G3L_red'])
+        self.G4_L=(self.GCaMP_data['G4L_green']/self.GCaMP_data['G4L_red'])
+        self.G5_L=(self.GCaMP_data['G5L_green']/self.GCaMP_data['G5L_red'])
 
-        self.G2_AVG= np.mean(np.concatenate((self.G2_L, self.G2_R), axis=0))
-        self.G3_AVG=np.mean(np.concatenate((self.G3_L, self.G3_R),axis=0))
-        self.G4_AVG=np.mean(np.concatenate((self.G4_L, self.G4_R),axis=0))
-        self.G5_AVG=np.mean(np.concatenate((self.G5_L, self.G5_R),axis=0))
+        a = np.array([self.G2_L, self.G2_R]).T
+        b = np.array([self.G3_L, self.G3_R]).T
+        c = np.array([self.G4_L, self.G4_R]).T
+        d = np.array([self.G5_L, self.G5_R]).T
+
+        
+        self.G2_AVG = np.mean(a, axis=1)
+        self.G3_AVG=np.mean(b, axis=1)
+        self.G4_AVG=np.mean(c, axis=1)
+        self.G5_AVG=np.mean(d, axis=1)
 
     
     def process_kinematic_data(self):
@@ -206,7 +211,6 @@ def generate_trial_objects(path_tuples):
     return trial_objects  
 
 
-
 def process_trial_data(list_of_trials):
     processed_trials = []
     for trial in list_of_trials:
@@ -214,3 +218,5 @@ def process_trial_data(list_of_trials):
         trial.process_GCaMP_data()
         processed_trials.append(trial)
     return processed_trials
+
+
